@@ -22,6 +22,7 @@ install:
   - pip --version
   - tox --version
 script:
+  - set | grep AWS
   - tox -v
 after_failure:
   - more .tox/log/* | cat
