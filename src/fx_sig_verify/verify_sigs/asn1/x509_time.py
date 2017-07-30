@@ -37,17 +37,20 @@ class Time(univ.Choice):
       namedtype.NamedType('utcTime', useful.UTCTime()),
       namedtype.NamedType('generalTime', useful.GeneralizedTime()))
 
+  # pyasn1 0.3.1+ also supports .toDateTime() for ASN.1 time types
   def ToPythonEpochTime(self):
     """Takes a ASN.1 Time choice, and returns seconds since epoch in UTC."""
-    utc_time = self.getComponentByName('utcTime')
-    general_time = self.getComponentByName('generalTime')
-    if utc_time and general_time:
-      raise error.PyAsn1Error('Both elements of a choice are present.')
-    if general_time:
+    if not self.hasValue():
+        raise error.PyAsn1Error('Neither utcTime nor generalTime is present.')
+    name = self.getName()
+    component = self.getComponent()
+    if component is None or not component.hasValue():
+      raise error.PyAsn1Error('Neither utcTime nor generalTime is present.')
+    if name == 'generalTime':
       format_str = '%Y%m%d%H%M%SZ'
-      time_str = str(general_time)
+      time_str = str(component)
     else:
       format_str = '%y%m%d%H%M%SZ'
-      time_str = str(utc_time)
+      time_str = str(component)
     time_tpl = time.strptime(time_str, format_str)
     return calendar.timegm(time_tpl)
