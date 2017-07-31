@@ -35,21 +35,6 @@ def debug(*args):
             print("{}: {}".format(now, msg))
 
 
-# EVIL EVIL -- Monkeypatch to extend accessor
-# This patch is part of the google code, and must be set before calling any of
-# the analysis routines. See the verify_sigs directory for license information.
-# TODO(user): This was submitted to pyasn1. Remove when we have it back.
-def F(self, idx):
-    if type(idx) is int:
-        return self.getComponentByPosition(idx)
-    else:
-        return self.getComponentByName(idx)
-from pyasn1.type import univ  # noqa: E402 pylint: disable-msg=C6204,C6203
-univ.SequenceAndSetBase.__getitem__ = F
-del F, univ
-# EVIL EVIL
-
-
 class MozSignedObject(object):
     """
     Retain the state and context of the object we're checking. This includes the

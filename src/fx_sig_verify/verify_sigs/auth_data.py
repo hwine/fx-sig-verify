@@ -327,7 +327,7 @@ class AuthData(object):
         params = self.spc_info['messageDigest']['digestAlgorithm']['parameters']
         self._ValidateEmptyParams(params)
 
-        if self.signed_data['crls']:
+        if self.signed_data['crls'] is not None and self.signed_data['crls'].hasValue():
             raise Asn1Error('Don\'t know what to do with CRL information.')
 
         # Work through signer_info pieces that are easily validated
