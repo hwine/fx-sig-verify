@@ -21,6 +21,21 @@ warn() { for m; do echo "$m"; done 1>&2 ; }
 die() { warn "$@"; exit 2; }
 usage() { warn "$@" "${USAGE:-}" ; test $# -eq 0; exit $?; }
 
+get_now() {
+    # deal with Darwinism
+    local args
+    if [[ $(uname) == Darwin ]]; then
+        args='-u +"%Y-%m-%dT%H:%M+00:00"'
+    else
+        args="--utc --iso-8601=minutes"
+    fi
+    local now="$(date $args)"
+    echo $now
+}
+
+# Check for required tools
+which awslogs &>/dev/null || die "Missing python package awslogs"
+
 while [ $# -gt 0 ]; do
     case "$1" in
         -h|--help) usage ;;
@@ -45,8 +60,7 @@ fi
 echo "Using start time of $START_TIME"
 
 # build filename for now
-DATE=$(which gdate || which date)
-now="$($DATE --utc --iso-8601=minutes)"
+now=$(get_now)
 END_TIME="${END_TIME:-$now}"
 new_logs="logs-${END_TIME}.txt"
 
