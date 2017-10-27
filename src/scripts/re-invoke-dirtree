@@ -87,7 +87,7 @@ done
 
 [[ $# -eq 0 ]] && usage "Missing prefixes"
 
-tmp_dir=$(mktemp -d /tmp/${0##*/}-$USER-XXXXXX)
+tmp_dir=$(mktemp -d "/tmp/${0##*/}-$USER-XXXXXX")
 trap '$debug && echo "DEBUG files in $tmp_dir" || rm -rf $tmp_dir' EXIT
 
 list_exes() {
@@ -104,9 +104,9 @@ list_exes() {
         s3url="${s3url:0:-1}"
         warn "Looking for single file"
     fi
-    aws s3 ls --recursive $s3url |
+    aws s3 ls --recursive "$s3url" |
         # in a subshell
-        while read -a listing; do
+        while read -ra listing; do
             f_name="${listing[-1]}"
             [[ ${f_name: -4} == ".exe" ]] &&
                 echo "${listing[@]:3}"
@@ -121,30 +121,32 @@ make_template_file() {
     local s3_object_key="$key_name"
     if [[ -e $template_file ]]; then
         local orig_file="$template_file"
-        template_file=$(mktemp $orig_file.XXXXXX)
+        template_file=$(mktemp "$orig_file.XXXXXX")
         warn "Duplicate key name: $orig_file" "using: $template_file"
     fi
-    local json="$(echo ${invoke_template} |
+    local json
+    json="$(echo "${invoke_template}" |
                   sed -e "s,%%s3_object_bucket%%,$s3_object_bucket,g" \
                       -e "s,%%s3_object_key%%,$s3_object_key,g")"
     # convert to json, assuming no quotes
-    echo "$json" > $template_file
-    echo $template_file
+    echo "$json" > "$template_file"
+    echo "$template_file"
 }
 
 invoke() {
     local line
     local
-    while read line ; do
-        local input_json=$(make_template_file "$line")
-        local output_json="$input_json.out.json"
+    while read -r line ; do
+        local input_json output_json
+        input_json=$(make_template_file "$line")
+        output_json="$input_json.out.json"
         if $dry_run; then
             echo "would process '$line'"
         else
             aws lambda invoke \
-                --region $function_region \
-                --function-name $function_name \
-                --payload "$(cat $input_json)" \
+                --region "$function_region" \
+                --function-name "$function_name" \
+                --payload "$(cat "$input_json")" \
                 "$output_json"  ; \
             if test -s "$output_json"; then \
                 jq . "$output_json"; \
