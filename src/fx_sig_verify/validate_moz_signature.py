@@ -376,14 +376,13 @@ class MozSignedObjectViaLambda(MozSignedObject):
     def summary(self):
         debug("len errors {},  messages {}".format(len(self.errors),
                                                    len(self.messages)))
-        json_info = {
+        return {
             'bucket': self.bucket_name,
             'key': self.key_name,
             'status': self.get_status(),
             'results': self.errors + self.messages,
             's3wait': self.s3_wait_time,
         }
-        return json_info
 
     @trace_xray_subsegment()
     def get_flo(self):
@@ -453,9 +452,9 @@ class MozSignedObjectViaLambda(MozSignedObject):
             # recipient to decide urgency of further investigation.
             pieces = subject.split('/')
             subject = "{} ... {}".format(pieces[0], pieces[-1])
-            if len(subject) >= 100:
-                # don't try to be smarter, full text is still in 'msg'
-                subject = "Truncated subject, examine message"
+        if len(subject) >= 100:
+            # don't try to be smarter, full text is still in 'msg'
+            subject = "Truncated subject, examine message"
 
         # append bucket & key, short key first
         msg += "\n{}\nkey={}\nbucket={}".format(
@@ -546,9 +545,8 @@ def unpacked_s3_events(events, notices=None):
                 # embedded events encoded as json string
                 if notices:
                     notices['unpacker'] = "SNS message unpacked"
-                for inner in unpacked_s3_events(json.loads(
-                                                event['Sns']['Message'])):
-                    yield inner
+                yield from unpacked_s3_events(json.loads(
+                                                event['Sns']['Message']))
             else:
                 raise KeyError("unknown event type '{}'"
                                .format(json.dumps(event)))
@@ -561,8 +559,7 @@ def artifact_to_check_via_s3(lambda_event_record):
     key_name = lambda_event_record['s3']['object']['key']
     # issue #14 - the below decode majik is from AWS sample code.
     real_key_name = urllib.unquote_plus(key_name.encode('utf8'))
-    obj = MozSignedObjectViaLambda(bucket_name, real_key_name)
-    return obj
+    return MozSignedObjectViaLambda(bucket_name, real_key_name)
 
 
 @trace_xray_subsegment()

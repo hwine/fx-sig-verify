@@ -80,7 +80,7 @@ def check_exe(data_file):
     if len(hashes) > 1:
         print('More than one PE/COFF finger? Only printing first one.')
     for hname in sorted(hashes[0].keys()):
-        if hname != 'name' and hname != 'SignedData':
+        if hname not in ['name', 'SignedData']:
             print('%s: %s' % (hname, hashes[0][hname].encode('hex')))
     print
 
@@ -155,6 +155,8 @@ def check_exe(data_file):
                 print
 
             print('Certificates')
+            print
+
             for (issuer, serial), cert in auth.certificates.items():
                 print('  Issuer: %s' % issuer)
                 print('  Serial: %s' % serial)
@@ -173,8 +175,6 @@ def check_exe(data_file):
                 bin_cert = der_encoder.encode(cert)
                 print('  MD5: %s' % hashlib.md5(bin_cert).hexdigest())
                 print('  SHA1: %s' % hashlib.sha1(bin_cert).hexdigest())
-                print
-
             if auth.trailing_data:
                 print('Signature Blob had trailing (unvalidated) data (%d '
                       'bytes): %s' % (len(auth.trailing_data),

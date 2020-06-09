@@ -229,7 +229,7 @@ class AuthData(object):
         # TODO(user):
         # Parse them into a dict with serial, subject dn, issuer dn, lifetime,
         # algorithm, x509 version, extensions, ...
-        res = dict()
+        res = {}
         for cert in certs:
             res[self._ExtractIssuer(cert)] = cert
         return res
@@ -492,9 +492,8 @@ class AuthData(object):
                 raise Asn1Error('Cert chain not valid at countersig time.')
         else:
             # Check if certificate chain was valid at time 'timestamp'
-            if timestamp:
-                if not_before > timestamp > not_after:
-                    raise Asn1Error('Cert chain not valid at time timestamp.')
+            if timestamp and not_before > timestamp > not_after:
+                raise Asn1Error('Cert chain not valid at time timestamp.')
 
     def _ValidateCertChain(self, signee):
         # Get start of 'regular' chain

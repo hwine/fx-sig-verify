@@ -154,8 +154,7 @@ set_prod_true_list = [
 
 def create_bucket():
     conn = boto3.resource('s3', region_name='us-east-1')
-    bucket = conn.create_bucket(Bucket=bucket_name)
-    return bucket
+    return conn.create_bucket(Bucket=bucket_name)
 
 
 def upload_file(bucket, filename, key_name=None):
@@ -185,8 +184,7 @@ def setup_aws_mocks():
     client.subscribe(TopicArn=topic_arn,
                      Protocol="sqs",
                      Endpoint="arn:aws:sqs:us-east-1:123456789012:test-queue")
-    queue = sqs_conn.get_queue_by_name(QueueName=sqs_name)
-    return queue
+    return sqs_conn.get_queue_by_name(QueueName=sqs_name)
 
 
 def get_one_message(queue):

@@ -61,7 +61,7 @@ class DistinguishedName(object):
     Returns:
       A dict representing the Distinguished Name.
     """
-    val = dict()
+    val = {}
     for n in rdn:
       # Note that this does not work for e.g. DC which is present
       # multiple times.

@@ -142,8 +142,8 @@ class Fingerprinter(object):
     Returns:
       Next range of interest in a Range namedtuple.
     """
-    starts = set([x.CurrentRange().start for x in self.fingers if x.ranges])
-    ends = set([x.CurrentRange().end for x in self.fingers if x.ranges])
+    starts = {x.CurrentRange().start for x in self.fingers if x.ranges}
+    ends = {x.CurrentRange().end for x in self.fingers if x.ranges}
     if not starts:
       return None
     min_start = min(starts)
@@ -221,11 +221,10 @@ class Fingerprinter(object):
     for finger in self.fingers:
       res = {}
       leftover = finger.CurrentRange()
-      if leftover:
-        if (len(finger.ranges) > 1 or
-            leftover.start != self.filelength or
-            leftover.end != self.filelength):
-          raise RuntimeError('Non-empty range remains.')
+      if leftover and ((len(finger.ranges) > 1
+                        or leftover.start != self.filelength
+                        or leftover.end != self.filelength)):
+        raise RuntimeError('Non-empty range remains.')
       res.update(finger.metadata)
       for hasher in finger.hashers:
         res[hasher.name] = hasher.digest()

@@ -30,8 +30,7 @@ def setup_aws_mocks():
     client.subscribe(TopicArn=topic_arn,
                      Protocol="sqs",
                      Endpoint="arn:aws:sqs:us-east-1:123456789012:test-queue")
-    queue = sqs_conn.get_queue_by_name(QueueName=sqs_name)
-    return queue
+    return sqs_conn.get_queue_by_name(QueueName=sqs_name)
 
 
 def get_one_message(queue):
@@ -41,16 +40,15 @@ def get_one_message(queue):
 
 @pytest.fixture()
 def good_line():
-    payload = [
+    return [
         "50 " + 'x'*47,
         "99 " + 'x'*96,
     ]
-    return payload
 
 
 @pytest.fixture()
 def long_fixable_lines():
-    payload = [
+    return [
         PREFIX + "x/"*50 + SUFFIX,
         PREFIX + "/"*150 + SUFFIX,
         PREFIX + "x"*150 + '/' + SUFFIX,
@@ -58,16 +56,14 @@ def long_fixable_lines():
         "fail for s3://net-mozaws-prod-delivery-firefox/pub/firefox/releases/"
         "52.5.0esr/win32-sha1/ms/Firefox Setup 52.5.0esr.exe",
     ]
-    return payload
 
 
 @pytest.fixture()
 def unfixable_lines():
-    payload = [
+    return [
         "too long" * 20,  # no '/' for split
         "x"*110 + PREFIX + SUFFIX,  # splitable, but still too long
     ]
-    return payload
 
 
 @mock_sns

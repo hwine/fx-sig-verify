@@ -39,17 +39,15 @@ class MozSignedObjectViaCLI(MozSignedObject):
             print(self.format_message())
 
     def summary(self):
-        json_info = {
+        return {
             'bucket': self.bucket_name,
             'key': self.key_name,
             'status': self.get_status(),
             'results': self.errors + self.messages,
         }
-        return json_info
 
     def get_flo(self):
-        flo = open(self.artifact_name, 'rb')
-        return flo
+        return open(self.artifact_name, 'rb')
 
     def process_one_local_file(self):
         if self.verbose:
@@ -74,8 +72,7 @@ def parse_args(cmd_line=None):
                         help='print version and exit')
     parser.add_argument('suspect', help='file to check for validity',
                         nargs=1)
-    args = parser.parse_args(cmd_line)
-    return args
+    return parser.parse_args(cmd_line)
 
 
 def main(cmd_line=None):
